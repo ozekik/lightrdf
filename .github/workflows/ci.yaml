@@ -59,6 +59,7 @@ jobs:
           python -m venv .venv
           pip install poetry
           poetry install
+
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
