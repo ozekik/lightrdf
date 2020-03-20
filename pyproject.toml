@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lightrdf"
-version = "0.1.0+build.1"
+version = "0.1.1"
 description = "A fast and lightweight Python RDF parser which wraps bindings to Rust's Rio using PyO3"
 authors = ["Kentaro Ozeki"]
 license = "Apache-2.0"
