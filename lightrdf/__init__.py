@@ -2,7 +2,7 @@ from pathlib import Path
 
 from .lightrdf import nt, turtle, xml
 
-__all__ = ["nt", "turtle", "xml", "Parser"]
+__all__ = ["nt", "turtle", "xml", "Parser", "PatternParser", "RDFDocument"]
 
 # Derived from https://github.com/rubensworks/rdf-parse.js/blob/master/lib/RdfParser.ts
 CONTENT_MAPPINGS = {
