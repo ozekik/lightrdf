@@ -29,3 +29,4 @@ features = ["extension-module"]
 maintainer = "Kentaro Ozeki"
 maintainer-email = "kentaro.ozeki+dev@gmail.com"
 project-url = ["https://github.com/ozekik/lightrdf"]
+requires-python = ">=3.6"
