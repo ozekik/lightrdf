@@ -1,5 +1,6 @@
 # LightRDF
 
+[![PyPI version](https://badge.fury.io/py/lightrdf.svg)](https://pypi.python.org/pypi/lightrdf/)
 [![](https://github.com/ozekik/lightrdf/workflows/CI/badge.svg)](https://github.com/ozekik/lightrdf/actions)
 
 A fast and lightweight Python RDF parser which wraps bindings to Rust's [Rio](https://github.com/Tpt/rio) using [PyO3](https://github.com/PyO3/pyo3).
@@ -61,8 +62,40 @@ for triple in doc.search_triples("http://purl.obolibrary.org/obo/GO_0005840", No
 
 ## Benchmark (WIP)
 
+> On MacBook Air (13-inch, 2017), 1.8 GHz Intel Core i5, 8 GB 1600 MHz DDR3
+
+<https://gist.github.com/ozekik/b2ae3be0fcaa59670d4dd4759cdffbed>
+
+```bash
+$ wget -q http://purl.obolibrary.org/obo/go.owl
+$ gtime python3 count_triples_rdflib_graph.py ./go.owl  # RDFLib 4.2.2
+1436427
+235.29user 2.30system 3:59.56elapsed 99%CPU (0avgtext+0avgdata 1055816maxresident)k
+0inputs+0outputs (283major+347896minor)pagefaults 0swaps
+$ gtime python3 count_triples_lightrdf_rdfdocument.py ./go.owl  # LightRDF 0.1.1
+1436427
+7.90user 0.22system 0:08.27elapsed 98%CPU (0avgtext+0avgdata 163760maxresident)k
+0inputs+0outputs (106major+41389minor)pagefaults 0swaps
+$ gtime python3 count_triples_lightrdf_parser.py ./go.owl  # LightRDF 0.1.1
+1436427
+8.00user 0.24system 0:08.47elapsed 97%CPU (0avgtext+0avgdata 163748maxresident)k
+0inputs+0outputs (106major+41388minor)pagefaults 0swaps
 ```
+
+<https://gist.github.com/ozekik/636a8fb521401070e02e010ce591fa92>
+
+```bash
+$ wget -q http://downloads.dbpedia.org/2016-10/dbpedia_2016-10.nt
+$ gtime python3 count_triples_rdflib_ntparser.py dbpedia_2016-10.nt  # RDFLib 4.2.2
+31050
+1.63user 0.23system 0:02.47elapsed 75%CPU (0avgtext+0avgdata 26568maxresident)k
+0inputs+0outputs (1140major+6118minor)pagefaults 0swaps
+$ gtime python3 count_triples_lightrdf_ntparser.py dbpedia_2016-10.nt  # LightRDF 0.1.1
+31050
+0.21user 0.04system 0:00.36elapsed 71%CPU (0avgtext+0avgdata 7628maxresident)k
+0inputs+0outputs (534major+1925minor)pagefaults 0swaps
 ```
+
 
 ## Alternatives
 
@@ -71,13 +104,13 @@ for triple in doc.search_triples("http://purl.obolibrary.org/obo/GO_0005840", No
 
 ## Todo
 
-- [ ] Push to PyPI
-- [ ] Adopt CI
-- [ ] Handle Base IRI
+- [x] Push to PyPI
+- [x] Adopt CI
+- [x] Handle Base IRI
+- [x] Add basic tests
 - [ ] Support NQuads and TriG
 - [ ] Add docs
-- [ ] Add tests
-- [ ] Refactor
+- [ ] Add tests for [w3c/rdf-tests](https://github.com/w3c/rdf-tests)
 - [ ] Resume on error
 - [ ] Allow opening fp
 
