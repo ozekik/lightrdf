@@ -67,7 +67,17 @@ jobs:
           override: true
 
       - name: Build Python package
+        if: matrix.os != 'windows-latest'
         run: source .venv/bin/activate && maturin develop --release
 
+      - name: Build Python package
+        if: matrix.os == 'windows-latest'
+        run: source .venv\Scripts\activate && maturin develop --release
+
       - name: pytest
+        if: matrix.os != 'windows-latest'
         run: source .venv/bin/activate && tox
+
+      - name: pytest
+        if: matrix.os == 'windows-latest'
+        run: source .venv\Scripts\activate && tox
