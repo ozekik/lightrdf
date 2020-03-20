@@ -1,5 +1,7 @@
 # LightRDF
 
+[![](https://github.com/ozekik/lightrdf/workflows/CI/badge.svg)](https://github.com/ozekik/lightrdf/actions)
+
 A fast and lightweight Python RDF parser which wraps bindings to Rust's [Rio](https://github.com/Tpt/rio) using [PyO3](https://github.com/PyO3/pyo3).
 
 ## Features
