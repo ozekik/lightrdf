@@ -7,8 +7,16 @@ on:
   push:
 
 jobs:
+  # https://srz-zumix.blogspot.com/2019/10/github-actions-ci-skip.html
+  prepare:
+    runs-on: ubuntu-latest
+    if: "! contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - run: echo "[skip ci] ${{ contains(github.event.head_commit.message, '[skip ci]') }}"
+
   lint:
     runs-on: ubuntu-latest
+    needs: prepare
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -129,6 +137,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: PyPi publish
+        if: github.event_name == 'release' && github.event.action == 'created'
         env:
           MATURIN_PASSWORD: ${{ secrets.PYPI }}
         run: poetry run maturin publish --username __token__ --no-sdist --interpreter python${{matrix.python_version}}
