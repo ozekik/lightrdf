@@ -20,62 +20,62 @@ struct Parser {}
 
 #[pymethods]
 impl Parser {
-  #[new]
-  fn new() -> Self {
-    Parser {}
-  }
-  fn parse(&self, filename: &str, base_iri: Option<&str>) -> PyResult<common::TriplesIterator> {
-    let f = File::open(filename)?;
-    let buf = BufReader::new(f);
-    if let Ok(parser) = RdfXmlParser::new(buf, base_iri.unwrap_or("")) {
-      let term = Arc::new(AtomicBool::new(false));
-      Ok(common::TriplesIterator {
-        it: Box::new(create_iter(parser)),
-        pattern: (None, None, None) as common::TriplePattern,
-        term: term,
-      })
-    } else {
-      Err(common::Error::py_err("parser initialization failed"))
+    #[new]
+    fn new() -> Self {
+        Parser {}
     }
-  }
+    fn parse(&self, filename: &str, base_iri: Option<&str>) -> PyResult<common::TriplesIterator> {
+        let f = File::open(filename)?;
+        let buf = BufReader::new(f);
+        if let Ok(parser) = RdfXmlParser::new(buf, base_iri.unwrap_or("")) {
+            let term = Arc::new(AtomicBool::new(false));
+            Ok(common::TriplesIterator {
+                it: Box::new(create_iter(parser)),
+                pattern: (None, None, None) as common::TriplePattern,
+                term: term,
+            })
+        } else {
+            Err(common::Error::py_err("parser initialization failed"))
+        }
+    }
 }
 
 #[pyclass]
 struct PatternParser {
-  pattern: common::TriplePattern,
+    pattern: common::TriplePattern,
 }
 
 #[pymethods]
 impl PatternParser {
-  #[new]
-  fn new(pattern: &PyTuple) -> Self {
-    let _pattern: common::TriplePattern = (
-      pattern.get_item(0).extract::<Option<String>>().unwrap(),
-      pattern.get_item(1).extract::<Option<String>>().unwrap(),
-      pattern.get_item(2).extract::<Option<String>>().unwrap(),
-    );
-    PatternParser { pattern: _pattern }
-  }
-  fn parse(&self, filename: &str, base_iri: Option<&str>) -> PyResult<common::TriplesIterator> {
-    let f = File::open(filename)?;
-    let buf = BufReader::new(f);
-    if let Ok(parser) = RdfXmlParser::new(buf, base_iri.unwrap_or("")) {
-      let term = Arc::new(AtomicBool::new(false));
-      Ok(common::TriplesIterator {
-        it: Box::new(create_iter(parser)),
-        pattern: self.pattern.clone(),
-        term: term,
-      })
-    } else {
-      Err(common::Error::py_err("parser initialization failed"))
+    #[new]
+    fn new(pattern: &PyTuple) -> Self {
+        let _pattern: common::TriplePattern = (
+            pattern.get_item(0).extract::<Option<String>>().unwrap(),
+            pattern.get_item(1).extract::<Option<String>>().unwrap(),
+            pattern.get_item(2).extract::<Option<String>>().unwrap(),
+        );
+        PatternParser { pattern: _pattern }
     }
-  }
+    fn parse(&self, filename: &str, base_iri: Option<&str>) -> PyResult<common::TriplesIterator> {
+        let f = File::open(filename)?;
+        let buf = BufReader::new(f);
+        if let Ok(parser) = RdfXmlParser::new(buf, base_iri.unwrap_or("")) {
+            let term = Arc::new(AtomicBool::new(false));
+            Ok(common::TriplesIterator {
+                it: Box::new(create_iter(parser)),
+                pattern: self.pattern.clone(),
+                term: term,
+            })
+        } else {
+            Err(common::Error::py_err("parser initialization failed"))
+        }
+    }
 }
 
 #[pymodule]
 fn xml(_py: Python, m: &PyModule) -> PyResult<()> {
-  m.add_class::<Parser>()?;
-  m.add_class::<PatternParser>()?;
+    m.add_class::<Parser>()?;
+    m.add_class::<PatternParser>()?;
 
-  Ok(())
+    Ok(())
 }
