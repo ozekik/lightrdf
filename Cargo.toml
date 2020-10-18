@@ -19,6 +19,9 @@ rio_turtle = "0.4.0"
 rio_xml = "0.4.0"
 signal-hook = "0.1.13"
 
+[features]
+default = ["pyo3/extension-module"]
+
 [dependencies.pyo3]
 version = "0.10.0"
 # https://github.com/PyO3/pyo3/blob/c6abf24cca6a74a59d9a88715944f56313e1de21/guide/src/faq.md#i-cant-run-cargo-test-im-having-linker-issues-like-symbol-not-found-or-undefined-reference-to-_pyexc_systemerror
