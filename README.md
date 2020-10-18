@@ -83,6 +83,10 @@ $ gtime python3 count_triples_lightrdf_parser.py ./go.owl  # LightRDF 0.1.1
 0inputs+0outputs (106major+41388minor)pagefaults 0swaps
 ```
 
+<p align="center">
+<img src="assets/benchmark1.png" width="480" />
+</p>
+
 <https://gist.github.com/ozekik/636a8fb521401070e02e010ce591fa92>
 
 ```bash
@@ -97,6 +101,9 @@ $ gtime python3 count_triples_lightrdf_ntparser.py dbpedia_2016-10.nt  # LightRD
 0inputs+0outputs (534major+1925minor)pagefaults 0swaps
 ```
 
+<p align="center">
+<img src="assets/benchmark2.png" width="480" />
+</p>
 
 ## Alternatives
 
