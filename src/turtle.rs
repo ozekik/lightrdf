@@ -3,7 +3,6 @@ use pyo3::prelude::*;
 use pyo3::types::PyTuple;
 use rio_api::parser::TriplesParser;
 use rio_turtle::{TurtleError, TurtleParser};
-use std::convert::From;
 use std::fs::File;
 use std::io::BufReader;
 use std::iter;
@@ -35,7 +34,7 @@ impl Parser {
                 term: term,
             })
         } else {
-            Err(common::Error::py_err("parser initialization failed"))
+            Err(common::Error::new_err("parser initialization failed"))
         }
     }
 }
@@ -67,7 +66,7 @@ impl PatternParser {
                 term: term,
             })
         } else {
-            Err(common::Error::py_err("parser initialization failed"))
+            Err(common::Error::new_err("parser initialization failed"))
         }
     }
 }
