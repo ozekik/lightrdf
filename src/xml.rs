@@ -1,4 +1,5 @@
 extern crate signal_hook;
+use oxiri::Iri;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
 use rio_api::parser::TriplesParser;
@@ -26,16 +27,16 @@ impl Parser {
     fn parse(&self, filename: &str, base_iri: Option<&str>) -> PyResult<common::TriplesIterator> {
         let f = File::open(filename)?;
         let buf = BufReader::new(f);
-        if let Ok(parser) = RdfXmlParser::new(buf, base_iri.unwrap_or("")) {
-            let term = Arc::new(AtomicBool::new(false));
-            Ok(common::TriplesIterator {
-                it: Box::new(create_iter(parser)),
-                pattern: (None, None, None) as common::TriplePattern,
-                term: term,
-            })
-        } else {
-            Err(common::Error::new_err("parser initialization failed"))
-        }
+        let parser = RdfXmlParser::new(
+            buf,
+            base_iri.and_then(|iri| Iri::parse(iri.to_string()).ok()),
+        );
+        let term = Arc::new(AtomicBool::new(false));
+        Ok(common::TriplesIterator {
+            it: Box::new(create_iter(parser)),
+            pattern: (None, None, None) as common::TriplePattern,
+            term: term,
+        })
     }
 }
 
@@ -58,16 +59,16 @@ impl PatternParser {
     fn parse(&self, filename: &str, base_iri: Option<&str>) -> PyResult<common::TriplesIterator> {
         let f = File::open(filename)?;
         let buf = BufReader::new(f);
-        if let Ok(parser) = RdfXmlParser::new(buf, base_iri.unwrap_or("")) {
-            let term = Arc::new(AtomicBool::new(false));
-            Ok(common::TriplesIterator {
-                it: Box::new(create_iter(parser)),
-                pattern: self.pattern.clone(),
-                term: term,
-            })
-        } else {
-            Err(common::Error::new_err("parser initialization failed"))
-        }
+        let parser = RdfXmlParser::new(
+            buf,
+            base_iri.and_then(|iri| Iri::parse(iri.to_string()).ok()),
+        );
+        let term = Arc::new(AtomicBool::new(false));
+        Ok(common::TriplesIterator {
+            it: Box::new(create_iter(parser)),
+            pattern: self.pattern.clone(),
+            term: term,
+        })
     }
 }
 

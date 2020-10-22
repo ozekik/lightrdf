@@ -26,16 +26,13 @@ impl Parser {
     fn parse(&self, filename: &str) -> PyResult<common::TriplesIterator> {
         let f = File::open(filename)?;
         let buf = BufReader::new(f);
-        if let Ok(parser) = NTriplesParser::new(buf) {
-            let term = Arc::new(AtomicBool::new(false));
-            Ok(common::TriplesIterator {
-                it: Box::new(create_iter(parser)),
-                pattern: (None, None, None) as common::TriplePattern,
-                term: term,
-            })
-        } else {
-            Err(common::Error::new_err("parser initialization failed"))
-        }
+        let parser = NTriplesParser::new(buf);
+        let term = Arc::new(AtomicBool::new(false));
+        Ok(common::TriplesIterator {
+            it: Box::new(create_iter(parser)),
+            pattern: (None, None, None) as common::TriplePattern,
+            term: term,
+        })
     }
 }
 
@@ -58,16 +55,13 @@ impl PatternParser {
     fn parse(&self, filename: &str) -> PyResult<common::TriplesIterator> {
         let f = File::open(filename)?;
         let buf = BufReader::new(f);
-        if let Ok(parser) = NTriplesParser::new(buf) {
-            let term = Arc::new(AtomicBool::new(false));
-            Ok(common::TriplesIterator {
-                it: Box::new(create_iter(parser)),
-                pattern: self.pattern.clone(),
-                term: term,
-            })
-        } else {
-            Err(common::Error::new_err("parser initialization failed"))
-        }
+        let parser = NTriplesParser::new(buf);
+        let term = Arc::new(AtomicBool::new(false));
+        Ok(common::TriplesIterator {
+            it: Box::new(create_iter(parser)),
+            pattern: self.pattern.clone(),
+            term: term,
+        })
     }
 }
 

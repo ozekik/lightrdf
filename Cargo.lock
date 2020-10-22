@@ -112,6 +112,7 @@ checksum = "2448f6066e80e3bfc792e9c98bf705b4b0fc6e8ef5b43e5889aff0eaa9c58743"
 name = "lightrdf"
 version = "0.1.1"
 dependencies = [
+ "oxiri",
  "pyo3",
  "rio_api",
  "rio_turtle",
@@ -133,6 +134,18 @@ name = "memchr"
 version = "2.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3728d817d99e5ac407411fa471ff9800a778d88a24685968b36824eaf4bee400"
+
+[[package]]
+name = "oxilangtag"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "91b91e9ce02b749ae761eaa3686f24bc97d5b75ca9a17c774f5de4e5d788d451"
+
+[[package]]
+name = "oxiri"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8e54fb37480ffa01a9af93f991ba229b3091f2e6ac84c8f6df2c509356cc473"
 
 [[package]]
 name = "parking_lot"
@@ -258,25 +271,29 @@ checksum = "41cc0f7e4d5d4544e8861606a285bb08d3e70712ccc7d2b84d7c0ccfaf4b05ce"
 
 [[package]]
 name = "rio_api"
-version = "0.4.2"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "454f750912d688cf950ff54c65f63345523385b9a86da8f8b8e85df67f10baf6"
+checksum = "5f3057bb5d32a656ed84e7680b0ff792a0d0a9f528749930bfd8701625f7b387"
 
 [[package]]
 name = "rio_turtle"
-version = "0.4.2"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "405bb0dc1c95fea106ac223626598b6b1d9b838cec38117af149ae7c64922da6"
+checksum = "fbeb18a70b16b9497be10e5562b059dac70298aa8db061dcba2b4d6b6c5785c8"
 dependencies = [
+ "oxilangtag",
+ "oxiri",
  "rio_api",
 ]
 
 [[package]]
 name = "rio_xml"
-version = "0.4.2"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03ea475218a4cf10d106d7a25aaad1d06a8365880a9bb76e031dc56df8abf353"
+checksum = "814874aa983b543ffbd5ecb64064d4e0c92c25c529380c36ba19ef3293b8a8af"
 dependencies = [
+ "oxilangtag",
+ "oxiri",
  "quick-xml",
  "rio_api",
 ]
