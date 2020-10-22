@@ -29,7 +29,7 @@ pub type TriplePattern = (Option<String>, Option<String>, Option<String>);
 // create_exception!(xml, InvalidIri, exceptions::Exception);
 // create_exception!(xml, Other, exceptions::Exception);
 
-create_exception!(lightrdf, Error, exceptions::Exception);
+create_exception!(lightrdf, Error, exceptions::PyException);
 
 #[derive(Debug)]
 pub enum ParserError {
@@ -82,7 +82,7 @@ pub fn triple_to_striple(t: Triple) -> StringTriple {
 
 #[pyclass]
 pub struct TriplesIterator {
-    pub it: Box<dyn iter::Iterator<Item = Result<StringTriple, ParserError>>>,
+    pub it: Box<dyn iter::Iterator<Item = Result<StringTriple, ParserError>> + Send>,
     pub pattern: TriplePattern,
     pub term: Arc<AtomicBool>,
 }
@@ -111,15 +111,19 @@ impl PyIterProtocol for TriplesIterator {
                     // Rio can recover from error in case of ntriples/nquads
                     // continue;
                     return match e {
-                        ParserError::TurtleError(_) => Err(Error::py_err(e.to_string())),
-                        ParserError::RdfXmlError(_) => Err(Error::py_err(e.to_string())),
+                        ParserError::TurtleError(_) => {
+                            Err(Error::new_err(e.to_string()))
+                        }
+                        ParserError::RdfXmlError(_) => {
+                            Err(Error::new_err(e.to_string()))
+                        }
                     };
                 }
                 _ => {
-                    return Err(exceptions::StopIteration::py_err(""));
+                    return Err(exceptions::PyStopIteration::new_err(""));
                 }
             }
         }
-        Err(exceptions::KeyboardInterrupt::py_err(""))
+        Err(exceptions::PyKeyboardInterrupt::new_err(""))
     }
 }
