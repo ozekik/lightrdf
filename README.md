@@ -20,17 +20,18 @@ pip install lightrdf
 
 ## Usage
 
-**Iterate over all triples (Parser)**
+#### Iterate over all triples (Parser)
 
 ```python
 import lightrdf
 
 parser = lightrdf.Parser()  # or lightrdf.xml.Parser() for xml
 
-for triple in parser.parse("./go.owl", base_iri=""):
+for triple in parser.parse("./go.owl", base_iri=None):
     print(triple)
 ```
-**Iterate over all triples (HDT-like)**
+
+#### Iterate over all triples (HDT-like)
 
 ```python
 import lightrdf
@@ -43,7 +44,7 @@ for triple in doc.search_triples(None, None, None):
     print(triple)
 ```
 
-**Triple pattern (HDT-like)**
+#### Triple pattern (HDT-like)
 
 ```python
 import lightrdf
@@ -59,6 +60,57 @@ for triple in doc.search_triples("http://purl.obolibrary.org/obo/GO_0005840", No
 # ...
 # ('http://purl.obolibrary.org/obo/GO_0005840', 'http://www.geneontology.org/formats/oboInOwl#inSubset', 'http://purl.obolibrary.org/obo/go#goslim_yeast')
 # ('http://purl.obolibrary.org/obo/GO_0005840', 'http://www.w3.org/2000/01/rdf-schema#label', '"ribosome"^^<http://www.w3.org/2001/XMLSchema#string>')
+```
+
+#### Tip: Open file in Python (Parser)
+
+```python
+import lightrdf
+
+parser = lightrdf.Parser()
+
+with open("./go.owl", "rb") as f:
+    for triple in parser.parse(f, format="owl", base_iri=None):
+        print(triple)
+```
+
+```python
+import lightrdf
+
+parser = lightrdf.xml.Parser()
+
+with open("./go.owl", "rb") as f:
+    for triple in parser.parse(f, base_iri=None):
+        print(triple)
+```
+
+#### Tip: Open file in Python (HDT-like)
+
+```python
+import lightrdf
+
+with open("./go.owl", "rb") as f:
+    doc = lightrdf.RDFDocument(f, parser=lightrdf.xml.PatternParser)
+
+    for triple in doc.search_triples("http://purl.obolibrary.org/obo/GO_0005840", None, None):
+        print(triple)
+```
+
+#### Tip: Parse from string
+
+```python
+import io
+import lightrdf
+
+data = """<http://one.example/subject1> <http://one.example/predicate1> <http://one.example/object1> . # comments here
+# or on a line by themselves
+_:subject1 <http://an.example/predicate1> "object1" .
+_:subject2 <http://an.example/predicate2> "object2" ."""
+
+doc = lightrdf.RDFDocument(io.BytesIO(data.encode()), parser=lightrdf.turtle.PatternParser)
+
+for triple in doc.search_triples("http://one.example/subject1", None, None):
+    print(triple)
 ```
 
 ## Benchmark (WIP)
@@ -120,11 +172,11 @@ $ gtime python3 count_triples_lightrdf_ntparser.py dbpedia_2016-10.nt  # LightRD
 - [ ] Add docs
 - [ ] Add tests for [w3c/rdf-tests](https://github.com/w3c/rdf-tests)
 - [ ] Resume on error
-- [ ] Allow opening fp
+- [x] Allow opening fp
 
 ## License
 
-[Rio](https://github.com/PyO3/pyo3) and [PyO3](https://github.com/PyO3/pyo3) are licensed under the Apache-2.0 license.
+[Rio](https://github.com/Tpt/rio) and [PyO3](https://github.com/PyO3/pyo3) are licensed under the Apache-2.0 license.
 
     Copyright 2020 Kentaro Ozeki
 
