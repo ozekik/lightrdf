@@ -2,6 +2,7 @@ extern crate signal_hook;
 use oxiri::Iri;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
+use pyo3_file::PyFileLikeObject;
 use rio_api::parser::TriplesParser;
 use rio_xml::{RdfXmlError, RdfXmlParser};
 use std::fs::File;
@@ -24,7 +25,25 @@ impl Parser {
     fn new() -> Self {
         Parser {}
     }
-    fn parse(&self, filename: &str, base_iri: Option<&str>) -> PyResult<common::TriplesIterator> {
+    fn parse(&self, file: PyObject, base_iri: Option<&str>) -> PyResult<common::TriplesIterator> {
+        let f = PyFileLikeObject::with_requirements(file, true, false, false)?;
+        let buf = BufReader::new(f);
+        let parser = RdfXmlParser::new(
+            buf,
+            base_iri.and_then(|iri| Iri::parse(iri.to_string()).ok()),
+        );
+        let term = Arc::new(AtomicBool::new(false));
+        Ok(common::TriplesIterator {
+            it: Box::new(create_iter(parser)),
+            pattern: (None, None, None) as common::TriplePattern,
+            term: term,
+        })
+    }
+    fn parse_from_filename(
+        &self,
+        filename: &str,
+        base_iri: Option<&str>,
+    ) -> PyResult<common::TriplesIterator> {
         let f = File::open(filename)?;
         let buf = BufReader::new(f);
         let parser = RdfXmlParser::new(
@@ -56,7 +75,25 @@ impl PatternParser {
         );
         PatternParser { pattern: _pattern }
     }
-    fn parse(&self, filename: &str, base_iri: Option<&str>) -> PyResult<common::TriplesIterator> {
+    fn parse(&self, file: PyObject, base_iri: Option<&str>) -> PyResult<common::TriplesIterator> {
+        let f = PyFileLikeObject::with_requirements(file, true, false, false)?;
+        let buf = BufReader::new(f);
+        let parser = RdfXmlParser::new(
+            buf,
+            base_iri.and_then(|iri| Iri::parse(iri.to_string()).ok()),
+        );
+        let term = Arc::new(AtomicBool::new(false));
+        Ok(common::TriplesIterator {
+            it: Box::new(create_iter(parser)),
+            pattern: self.pattern.clone(),
+            term: term,
+        })
+    }
+    fn parse_from_filename(
+        &self,
+        filename: &str,
+        base_iri: Option<&str>,
+    ) -> PyResult<common::TriplesIterator> {
         let f = File::open(filename)?;
         let buf = BufReader::new(f);
         let parser = RdfXmlParser::new(

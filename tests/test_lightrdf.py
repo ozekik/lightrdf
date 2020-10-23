@@ -1,7 +1,9 @@
+import io
 import os
-import pytest
+from pathlib import Path
 
 import lightrdf
+import pytest
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -74,7 +76,7 @@ testcases_pattern = [
 
 
 @pytest.mark.parametrize("filename,expected", testcases)
-def test_parser(filename, expected):
+def test_parser_from_filename(filename, expected):
     path = os.path.join(current_dir, filename)
     parser = lightrdf.Parser()
     triples = []
@@ -83,8 +85,20 @@ def test_parser(filename, expected):
     assert len(triples) == 1840 and triples[-len(expected) :] == expected
 
 
+@pytest.mark.parametrize("filename,expected", testcases)
+def test_parser(filename, expected):
+    path = Path(os.path.join(current_dir, filename))
+    with open(path, "rb") as f:
+        file = io.BytesIO(f.read())
+    parser = lightrdf.Parser()
+    triples = []
+    for triple in parser.parse(file, format=path.suffix.lstrip(".")):
+        triples.append(triple)
+    assert len(triples) == 1840 and triples[-len(expected) :] == expected
+
+
 @pytest.mark.parametrize("filename,expected", testcases_pattern)
-def test_pattern_parser(filename, expected):
+def test_pattern_parser_from_filename(filename, expected):
     path = os.path.join(current_dir, filename)
     parser = lightrdf.PatternParser(
         (
@@ -100,9 +114,53 @@ def test_pattern_parser(filename, expected):
 
 
 @pytest.mark.parametrize("filename,expected", testcases_pattern)
-def test_rdf_document(filename, expected):
+def test_pattern_parser(filename, expected):
+    path = Path(os.path.join(current_dir, filename))
+    with open(path, "rb") as f:
+        file = io.BytesIO(f.read())
+    parser = lightrdf.PatternParser(
+        (
+            "http://purl.obolibrary.org/obo/FAO_0002011",
+            "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            None,
+        )
+    )
+    triples = []
+    for triple in parser.parse(file, format=path.suffix.lstrip(".")):
+        triples.append(triple)
+    assert triples == expected
+
+
+@pytest.mark.parametrize("filename,expected", testcases_pattern)
+def test_rdf_document_from_filename(filename, expected):
     path = os.path.join(current_dir, filename)
     doc = lightrdf.RDFDocument(path)
+    triples = []
+    pattern = (
+        "http://purl.obolibrary.org/obo/FAO_0002011",
+        "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+        None,
+    )
+    for triple in doc.search_triples(*pattern):
+        triples.append(triple)
+    # Repeat
+    for triple in doc.search_triples(*pattern):
+        triples.append(triple)
+    assert triples == expected * 2
+
+
+@pytest.mark.parametrize("filename,expected", testcases_pattern)
+def test_rdf_document(filename, expected):
+    path = Path(os.path.join(current_dir, filename))
+    with open(path, "rb") as f:
+        file = io.BytesIO(f.read())
+    if path.suffix == ".nt":
+        parser = lightrdf.nt.PatternParser
+    elif path.suffix == ".ttl":
+        parser = lightrdf.turtle.PatternParser
+    elif path.suffix == ".owl":
+        parser = lightrdf.xml.PatternParser
+    doc = lightrdf.RDFDocument(file, parser=parser)
     triples = []
     pattern = (
         "http://purl.obolibrary.org/obo/FAO_0002011",
