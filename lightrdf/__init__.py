@@ -1,6 +1,9 @@
+import io
 from pathlib import Path
 
-from .lightrdf import nt, turtle, xml
+from .python_module import nt
+from .python_module import turtle
+from .python_module import xml
 
 __all__ = ["nt", "turtle", "xml", "Parser", "PatternParser", "RDFDocument"]
 
@@ -29,11 +32,11 @@ class Error(Exception):
 
 def guess_module(suffix):
     if CONTENT_MAPPINGS[suffix] == "application/n-triples":
-        module = lightrdf.nt
+        module = nt
     elif CONTENT_MAPPINGS[suffix] == "text/turtle":
-        module = lightrdf.turtle
+        module = turtle
     elif CONTENT_MAPPINGS[suffix] == "application/rdf+xml":
-        module = lightrdf.xml
+        module = xml
     else:
         # TODO: Unimplemented error before this
         # Raise error, or fallback
@@ -45,39 +48,56 @@ class Parser:
     def __init__(self):
         pass
 
-    def parse(self, filename, base_iri=""):
-        path = Path(filename)
-        parser = guess_module(path.suffix).Parser
-        if base_iri:
-            return parser().parse(filename, base_iri)
+    def parse(self, filelike_or_filename, format=None, base_iri=None):
+        if isinstance(filelike_or_filename, io.BufferedIOBase):
+            if format is None:
+                raise Error("Format must be specified")
+            parser = guess_module(f".{format}").Parser
         else:
-            return parser().parse(filename)
+            path = Path(filelike_or_filename)
+            parser = guess_module(path.suffix).Parser
+        if base_iri:
+            return parser().parse(filelike_or_filename, base_iri)
+        else:
+            return parser().parse(filelike_or_filename)
 
 
 class PatternParser:
     def __init__(self, pattern):
         self.pattern = pattern
 
-    def parse(self, filename, base_iri=""):
-        path = Path(filename)
-        parser = guess_module(path.suffix).PatternParser
-        if base_iri:
-            return parser(self.pattern).parse(filename, base_iri)
+    def parse(self, filelike_or_filename, format=None, base_iri=None):
+        if isinstance(filelike_or_filename, io.BufferedIOBase):
+            if format is None:
+                raise Error("Format must be specified")
+            parser = guess_module(f".{format}").PatternParser
         else:
-            return parser(self.pattern).parse(filename)
+            path = Path(filelike_or_filename)
+            parser = guess_module(path.suffix).PatternParser
+        if base_iri:
+            return parser(self.pattern).parse(filelike_or_filename, base_iri)
+        else:
+            return parser(self.pattern).parse(filelike_or_filename)
 
 
 class RDFDocument:
-    def __init__(self, filename, base_iri="", parser=None):
-        self.filename = filename
+    def __init__(self, filelike_or_filename, base_iri=None, parser=None):
+        self.filelike_or_filename = filelike_or_filename
         self.base_iri = base_iri
-        if parser is None:
-            path = Path(filename)
-            parser = guess_module(path.suffix).PatternParser
-        self.parser = parser
+        if isinstance(filelike_or_filename, io.BufferedIOBase):
+            if parser is None:
+                raise Error("Parser must be specified")
+            self.parser = parser
+        else:
+            if parser is None:
+                path = Path(filelike_or_filename)
+                parser = guess_module(path.suffix).PatternParser
+            self.parser = parser
 
     def search_triples(self, s, p, o):
+        if isinstance(self.filelike_or_filename, io.BufferedIOBase):
+            self.filelike_or_filename.seek(0)
         if self.base_iri:
-            return self.parser((s, p, o)).parse(self.filename, self.base_iri)
+            return self.parser((s, p, o)).parse(self.filelike_or_filename, self.base_iri)
         else:
-            return self.parser((s, p, o)).parse(self.filename)
+            return self.parser((s, p, o)).parse(self.filelike_or_filename)

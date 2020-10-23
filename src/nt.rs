@@ -1,6 +1,7 @@
 extern crate signal_hook;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
+use pyo3_file::PyFileLikeObject;
 use rio_api::parser::TriplesParser;
 use rio_turtle::{NTriplesParser, TurtleError};
 use std::fs::File;
@@ -23,7 +24,18 @@ impl Parser {
     fn new() -> Self {
         Parser {}
     }
-    fn parse(&self, filename: &str) -> PyResult<common::TriplesIterator> {
+    fn parse(&self, file: PyObject) -> PyResult<common::TriplesIterator> {
+        let f = PyFileLikeObject::with_requirements(file, true, false, false)?;
+        let buf = BufReader::new(f);
+        let parser = NTriplesParser::new(buf);
+        let term = Arc::new(AtomicBool::new(false));
+        Ok(common::TriplesIterator {
+            it: Box::new(create_iter(parser)),
+            pattern: (None, None, None) as common::TriplePattern,
+            term: term,
+        })
+    }
+    fn parse_from_filename(&self, filename: &str) -> PyResult<common::TriplesIterator> {
         let f = File::open(filename)?;
         let buf = BufReader::new(f);
         let parser = NTriplesParser::new(buf);
@@ -52,7 +64,18 @@ impl PatternParser {
         );
         PatternParser { pattern: _pattern }
     }
-    fn parse(&self, filename: &str) -> PyResult<common::TriplesIterator> {
+    fn parse(&self, file: PyObject) -> PyResult<common::TriplesIterator> {
+        let f = PyFileLikeObject::with_requirements(file, true, false, false)?;
+        let buf = BufReader::new(f);
+        let parser = NTriplesParser::new(buf);
+        let term = Arc::new(AtomicBool::new(false));
+        Ok(common::TriplesIterator {
+            it: Box::new(create_iter(parser)),
+            pattern: self.pattern.clone(),
+            term: term,
+        })
+    }
+    fn parse_from_filename(&self, filename: &str) -> PyResult<common::TriplesIterator> {
         let f = File::open(filename)?;
         let buf = BufReader::new(f);
         let parser = NTriplesParser::new(buf);

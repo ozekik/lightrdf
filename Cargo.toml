@@ -15,6 +15,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 oxiri = "0.1.1"
+pyo3-file = "0.3.3"
 rio_api = "0.5.0"
 rio_turtle = "0.5.0"
 rio_xml = "0.5.0"
