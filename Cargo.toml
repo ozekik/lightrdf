@@ -1,6 +1,6 @@
 [package]
 name = "lightrdf"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Kentaro Ozeki <32771324+ozekik@users.noreply.github.com>"]
 description = "A fast and lightweight Python RDF parser which wraps bindings to Rust's Rio using PyO3"
 edition = "2018"

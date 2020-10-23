@@ -204,7 +204,7 @@ checksum = "2448f6066e80e3bfc792e9c98bf705b4b0fc6e8ef5b43e5889aff0eaa9c58743"
 
 [[package]]
 name = "lightrdf"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "oxiri",
  "pyo3",
