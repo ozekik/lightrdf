@@ -111,12 +111,8 @@ impl PyIterProtocol for TriplesIterator {
                     // Rio can recover from error in case of ntriples/nquads
                     // continue;
                     return match e {
-                        ParserError::TurtleError(_) => {
-                            Err(Error::new_err(e.to_string()))
-                        }
-                        ParserError::RdfXmlError(_) => {
-                            Err(Error::new_err(e.to_string()))
-                        }
+                        ParserError::TurtleError(_) => Err(Error::new_err(e.to_string())),
+                        ParserError::RdfXmlError(_) => Err(Error::new_err(e.to_string())),
                     };
                 }
                 _ => {
