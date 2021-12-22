@@ -75,7 +75,7 @@ pub fn triple_to_striple(t: Triple) -> StringTriple {
     let obj = match t.object {
         Term::NamedNode(NamedNode { iri }) => iri.to_string(),
         Term::BlankNode(BlankNode { id }) => id.to_string(),
-        Term::Literal { 0: literal } => literal.to_string(),
+        Term::Literal(literal) => literal.to_string(),
     };
     (subj, pred, obj) as StringTriple
 }

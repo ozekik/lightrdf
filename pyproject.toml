@@ -12,6 +12,7 @@ python = "^3.6"
 tox = "^3.20.1"
 maturin = "^0.8.3"
 tox-gh-actions = "^2.1.0"
+pytest = "^6.2.5"
 
 [build-system]
 requires = ["maturin"]
