@@ -69,9 +69,9 @@ impl PatternParser {
     #[new]
     fn new(pattern: &PyTuple) -> Self {
         let _pattern: common::TriplePattern = (
-            pattern.get_item(0).extract::<Option<String>>().unwrap(),
-            pattern.get_item(1).extract::<Option<String>>().unwrap(),
-            pattern.get_item(2).extract::<Option<String>>().unwrap(),
+            pattern.get_item(0).unwrap().extract::<Option<String>>().unwrap(),
+            pattern.get_item(1).unwrap().extract::<Option<String>>().unwrap(),
+            pattern.get_item(2).unwrap().extract::<Option<String>>().unwrap(),
         );
         PatternParser { pattern: _pattern }
     }
@@ -110,7 +110,7 @@ impl PatternParser {
 }
 
 #[pymodule]
-fn turtle(_py: Python, m: &PyModule) -> PyResult<()> {
+pub(crate) fn turtle(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Parser>()?;
     m.add_class::<PatternParser>()?;
 

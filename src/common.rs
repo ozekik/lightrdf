@@ -2,7 +2,6 @@ extern crate signal_hook;
 use pyo3::create_exception;
 use pyo3::exceptions;
 use pyo3::prelude::*;
-use pyo3::PyIterProtocol;
 use rio_api::model::{BlankNode, NamedNode, NamedOrBlankNode, Term, Triple};
 use rio_turtle::TurtleError;
 use rio_xml::RdfXmlError;
@@ -87,8 +86,8 @@ pub struct TriplesIterator {
     pub term: Arc<AtomicBool>,
 }
 
-#[pyproto]
-impl PyIterProtocol for TriplesIterator {
+#[pymethods]
+impl TriplesIterator {
     fn __iter__(slf: PyRefMut<Self>) -> PyResult<PyObject> {
         let py = unsafe { Python::assume_gil_acquired() };
         signal_hook::flag::register(signal_hook::SIGINT, Arc::clone(&slf.term))?;
