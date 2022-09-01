@@ -16,7 +16,7 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    needs: prepare
+    needs: [prepare]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -45,103 +45,164 @@ jobs:
       #     command: test
       #     toolchain: nightly
 
-  build:
-    runs-on: ${{ matrix.os }}
-    needs: lint
+  build: # Workflow credit to https://github.com/Cryptex-github/ril-py/blob/main/.github/workflows/py-binding.yml
+    name: >
+      build ${{ matrix.python-version }} on ${{ matrix.platform || matrix.os }}
+      (${{ matrix.alt_arch_name || matrix.arch }})
+    needs: [lint]
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu, macos, windows]
+        # python-version: ['cp310', 'pp37', 'pp38', 'pp39']
+        python-version: ["cp37", "cp38", "cp39", "cp310"]
+        arch: [main, alt]
+        include:
+          - os: ubuntu
+            platform: linux
+          - os: windows
+            ls: dir
+          - os: macos
+            arch: alt
+            alt_arch_name: "arm64 universal2"
+        exclude:
+          - os: windows
+            arch: alt
+          - os: macos
+            python-version: "cp37"
+            arch: alt
+          # - os: macos
+          #   python-version: "pp37"
+          #   arch: alt
+          # - os: macos
+          #   python-version: "pp38"
+          #   arch: alt
+          # - os: macos
+          #   python-version: "pp39"
+          #   arch: alt
+          - os: ubuntu
+            arch: alt
 
+    runs-on: ${{ format('{0}-latest', matrix.os) }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - name: set up python
+        uses: actions/setup-python@v3
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.9"
 
-      - name: Install dependencies
-        run: |
-          python -m venv .venv
-          pip install poetry
-          poetry install
-
-      - name: Install latest stable
+      - name: set up rust
         uses: actions-rs/toolchain@v1
         with:
+          profile: minimal
           toolchain: stable
           override: true
 
-      - name: Cache Rust dependencies
+      - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
-
-      - name: Build Python package
-        run: poetry run maturin develop --release
-
-      - name: pytest
-        run: poetry run tox
-
-  # python-publish:
-  #   needs: build
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       python-version: [3.7, 3.8]
-  #       os: [ubuntu-latest, macos-latest, windows-latest]
-  #   steps:
-  #     - uses: actions/checkout@v1
-
-  #     - uses: actions/setup-python@v1
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-
-  #     - name: Install latest nightly
-  #       uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: nightly
-  #         override: true
-
-  #     - name: Install dependencies
-  #       run: |
-  #         python -m venv .venv
-  #         pip install poetry
-  #         poetry install
-
-      - name: Build Python package
-        run: poetry run maturin build --release --strip --interpreter python${{matrix.python_version}}
-
-      - name: List wheels
-        if: matrix.os == 'windows-latest'
-        run: dir target\wheels\
-
-      - name: List wheels
-        if: matrix.os != 'windows-latest'
-        run: find ./target/wheels/
-
-      # Note: Windows doesn't support glob
-      # https://stackoverflow.com/a/52481267/270334
-      - name: Install wheels
-        if: matrix.os == 'windows-latest'
-        run: pip install --find-links=target\wheels lightrdf
-
-      - name: Install wheels
-        if: matrix.os != 'windows-latest'
-        run: pip install target/wheels/lightrdf*.whl
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: target/wheels/lightrdf*.whl
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          key: ${{ matrix.alt_arch_name }}
 
-      - name: PyPi publish
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+      - run: rustup target add aarch64-apple-darwin
+        if: matrix.os == 'macos'
+
+      - run: rustup toolchain install stable-i686-pc-windows-msvc
+        if: matrix.os == 'windows'
+
+      - run: rustup target add i686-pc-windows-msvc
+        if: matrix.os == 'windows'
+
+      - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+
+      - name: Cache python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}
+
+      - name: install python dependencies
+        run: pip install -U setuptools wheel twine cibuildwheel platformdirs
+
+      - name: Display cibuildwheel cache dir
+        id: cibuildwheel-cache
+        run: |
+          from platformdirs import user_cache_path
+          print('::set-output name=dir::' + str(user_cache_path(appname='cibuildwheel', appauthor='pypa')))
+        shell: python
+
+      - name: Cache cibuildwheel tools
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.cibuildwheel-cache.outputs.dir }}
+          key: ${{ runner.os }}-cibuildwheel-${{ matrix.python-version }}
+
+      # - name: build sdist
+      #   if: matrix.os == 'ubuntu' && matrix.python-version == 'cp310'
+      #   run: |
+      #     pip install maturin build
+      #     python -m build --sdist -o wheelhouse
+      - name: build ${{ matrix.platform || matrix.os }} binaries
+        run: cibuildwheel --output-dir wheelhouse
         env:
-          MATURIN_PASSWORD: ${{ secrets.PYPI }}
-        run: poetry run maturin publish --username __token__ --interpreter python${{matrix.python_version}}
+          CIBW_BUILD: "${{ matrix.python-version }}-*"
+          # rust doesn't seem to be available for musl linux on i686
+          CIBW_SKIP: "*-musllinux_i686"
+          # we build for "alt_arch_name" if it exists, else 'auto'
+          CIBW_ARCHS: ${{ matrix.alt_arch_name || 'auto' }}
+          CIBW_ENVIRONMENT: 'PATH="$HOME/.cargo/bin:$PATH" CARGO_TERM_COLOR="always"'
+          CIBW_ENVIRONMENT_WINDOWS: 'PATH="$UserProfile\.cargo\bin;$PATH"'
+          CIBW_BEFORE_BUILD: rustup show
+          CIBW_BEFORE_BUILD_LINUX: >
+            curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain=stable --profile=minimal -y &&
+            rustup show
+          CIBW_TEST_COMMAND: "pytest {project}/tests/"
+          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_SKIP: "*-macosx_arm64 *-macosx_universal2:arm64"
+          CIBW_BUILD_VERBOSITY: 1
+
+      - run: ${{ matrix.ls || 'ls -lh' }} wheelhouse/
+
+      - run: twine check wheelhouse/*
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: wheelhouse
+
+  release:
+    needs: [build]
+    if: "success() && startsWith(github.ref, 'refs/tags/')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - run: pip install -U twine
+
+      - name: get wheelhouse artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: wheels
+          path: wheelhouse
+
+      - run: twine check wheelhouse/*
+
+      - name: upload to pypi
+        run: twine upload --skip-existing wheelhouse/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI }}
+
+      - name: Upload artifacts to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: wheelhouse/*
