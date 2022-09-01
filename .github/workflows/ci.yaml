@@ -75,6 +75,9 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
       - name: Build Python package
         run: poetry run maturin develop --release
 
