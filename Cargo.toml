@@ -14,11 +14,11 @@ name = "lightrdf"
 crate-type = ["cdylib"]
 
 [dependencies]
-oxiri = "0.1.1"
+oxiri = "0.2.2"
 pyo3-file = "0.5.0"
-rio_api = "0.5.0"
-rio_turtle = "0.5.0"
-rio_xml = "0.5.0"
+rio_api = "0.7.0"
+rio_turtle = "0.7.0"
+rio_xml = "0.7.0"
 signal-hook = "0.3.14"
 pyo3 = "0.16.6"
 

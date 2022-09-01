@@ -2,7 +2,7 @@ extern crate signal_hook;
 use pyo3::create_exception;
 use pyo3::exceptions;
 use pyo3::prelude::*;
-use rio_api::model::{BlankNode, NamedNode, NamedOrBlankNode, Term, Triple};
+use rio_api::model::{BlankNode, NamedNode, Subject, Term, Triple};
 use rio_turtle::TurtleError;
 use rio_xml::RdfXmlError;
 use std::convert::From;
@@ -65,8 +65,9 @@ impl From<RdfXmlError> for ParserError {
 
 pub fn triple_to_striple(t: Triple) -> StringTriple {
     let subj = match t.subject {
-        NamedOrBlankNode::NamedNode(NamedNode { iri }) => iri.to_string(),
-        NamedOrBlankNode::BlankNode(BlankNode { id }) => id.to_string(),
+        Subject::NamedNode(NamedNode { iri }) => iri.to_string(),
+        Subject::BlankNode(BlankNode { id }) => id.to_string(),
+        Subject::Triple(triple) => triple.to_string(), // TODO: Handle RDF-star
     };
     let pred = match t.predicate {
         NamedNode { iri } => iri.to_string(),
@@ -75,6 +76,7 @@ pub fn triple_to_striple(t: Triple) -> StringTriple {
         Term::NamedNode(NamedNode { iri }) => iri.to_string(),
         Term::BlankNode(BlankNode { id }) => id.to_string(),
         Term::Literal(literal) => literal.to_string(),
+        Term::Triple(triple) => triple.to_string(), // TODO: Handle RDF-star
     };
     (subj, pred, obj) as StringTriple
 }

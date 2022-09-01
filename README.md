@@ -173,6 +173,7 @@ $ gtime python3 count_triples_lightrdf_ntparser.py dbpedia_2016-10.nt  # LightRD
 - [ ] Add tests for [w3c/rdf-tests](https://github.com/w3c/rdf-tests)
 - [ ] Resume on error
 - [x] Allow opening fp
+- [ ] Support and test on RDF-star
 
 ## License
 
