@@ -5,8 +5,8 @@ authors = ["Kentaro Ozeki <32771324+ozekik@users.noreply.github.com>"]
 description = "A fast and lightweight Python RDF parser which wraps bindings to Rust's Rio using PyO3"
 edition = "2018"
 license = "Apache-2.0"
-repository = "https://github.com/ozekik/lightrdf"
 homepage = "https://github.com/ozekik/lightrdf"
+repository = "https://github.com/ozekik/lightrdf"
 readme = "README.md"
 
 [lib]
@@ -27,9 +27,3 @@ default = ["pyo3/extension-module"]
 
 [dependencies.pyo3]
 version = "0.12.0"
-
-[package.metadata.maturin]
-maintainer = "Kentaro Ozeki"
-maintainer-email = "kentaro.ozeki+dev@gmail.com"
-project-url = ["https://github.com/ozekik/lightrdf"]
-requires-python = ">=3.7"
