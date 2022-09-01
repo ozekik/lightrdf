@@ -90,7 +90,7 @@ pub struct TriplesIterator {
 impl TriplesIterator {
     fn __iter__(slf: PyRefMut<Self>) -> PyResult<PyObject> {
         let py = unsafe { Python::assume_gil_acquired() };
-        signal_hook::flag::register(signal_hook::SIGINT, Arc::clone(&slf.term))?;
+        signal_hook::flag::register(signal_hook::consts::SIGINT, Arc::clone(&slf.term))?;
         Ok(slf.into_py(py))
     }
 
