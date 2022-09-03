@@ -2,6 +2,7 @@ extern crate signal_hook;
 use pyo3::create_exception;
 use pyo3::exceptions;
 use pyo3::prelude::*;
+use regex::Regex;
 use rio_api::model::{Subject, Term, Triple};
 use rio_turtle::TurtleError;
 use rio_xml::RdfXmlError;
@@ -14,6 +15,7 @@ use std::sync::Arc;
 
 pub type StringTriple = (String, String, String);
 pub type TriplePattern = (Option<String>, Option<String>, Option<String>);
+pub type RegexTriplePattern = (Option<Regex>, Option<Regex>, Option<Regex>);
 
 // // https://docs.rs/rio_turtle/0.4.0/src/rio_turtle/error.rs.html
 // create_exception!(turtle, IO, exceptions::Exception);
@@ -82,7 +84,7 @@ pub fn triple_to_striple(t: Triple) -> StringTriple {
 #[pyclass]
 pub struct TriplesIterator {
     pub it: Box<dyn iter::Iterator<Item = Result<StringTriple, ParserError>> + Send>,
-    pub pattern: TriplePattern,
+    pub pattern: RegexTriplePattern,
     pub term: Arc<AtomicBool>,
 }
 
@@ -98,9 +100,11 @@ impl TriplesIterator {
         while !slf.term.load(Ordering::Relaxed) {
             match slf.it.next() {
                 Some(Ok(t)) => {
-                    if (slf.pattern.0.is_some() && *slf.pattern.0.as_ref().unwrap() != t.0)
-                        || (slf.pattern.1.is_some() && *slf.pattern.1.as_ref().unwrap() != t.1)
-                        || (slf.pattern.2.is_some() && *slf.pattern.2.as_ref().unwrap() != t.2)
+                    if (slf.pattern.0.is_some() && !slf.pattern.0.as_ref().unwrap().is_match(&t.0))
+                        || (slf.pattern.1.is_some()
+                            && !slf.pattern.1.as_ref().unwrap().is_match(&t.1))
+                        || (slf.pattern.2.is_some()
+                            && !slf.pattern.2.as_ref().unwrap().is_match(&t.2))
                     {
                         continue;
                     }

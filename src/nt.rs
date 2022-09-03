@@ -1,7 +1,9 @@
 extern crate signal_hook;
+use itertools::Itertools;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
 use pyo3_file::PyFileLikeObject;
+use regex::{escape, Regex};
 use rio_api::parser::TriplesParser;
 use rio_turtle::{NTriplesParser, TurtleError};
 use std::fs::File;
@@ -31,7 +33,7 @@ impl Parser {
         let term = Arc::new(AtomicBool::new(false));
         Ok(common::TriplesIterator {
             it: Box::new(create_iter(parser)),
-            pattern: (None, None, None) as common::TriplePattern,
+            pattern: (None, None, None) as common::RegexTriplePattern,
             term: term,
         })
     }
@@ -42,7 +44,7 @@ impl Parser {
         let term = Arc::new(AtomicBool::new(false));
         Ok(common::TriplesIterator {
             it: Box::new(create_iter(parser)),
-            pattern: (None, None, None) as common::TriplePattern,
+            pattern: (None, None, None) as common::RegexTriplePattern,
             term: term,
         })
     }
@@ -50,28 +52,45 @@ impl Parser {
 
 #[pyclass]
 struct PatternParser {
-    pattern: common::TriplePattern,
+    // pattern: common::TriplePattern,
+    pattern_re: common::RegexTriplePattern,
 }
 
 #[pymethods]
 impl PatternParser {
     #[new]
-    fn new(pattern: &PyTuple) -> Self {
-        let _pattern: common::TriplePattern = (
-            pattern.get_item(0).unwrap().extract::<Option<String>>().unwrap(),
-            pattern.get_item(1).unwrap().extract::<Option<String>>().unwrap(),
-            pattern.get_item(2).unwrap().extract::<Option<String>>().unwrap(),
-        );
-        PatternParser { pattern: _pattern }
+    #[args(regex = true)]
+    fn new(pattern: &PyTuple, regex: bool) -> Self {
+        let _pattern = pattern.extract::<common::TriplePattern>().unwrap();
+        let pattern_re: (Option<Regex>, Option<Regex>, Option<Regex>) =
+            vec![_pattern.0.clone(), _pattern.1.clone(), _pattern.2.clone()]
+                .iter()
+                .map(|x| match x {
+                    None => None,
+                    Some(term) => {
+                        if regex {
+                            Some(Regex::new(term).unwrap())
+                        } else {
+                            Some(Regex::new(&escape(term)).unwrap())
+                        }
+                    }
+                })
+                .collect_tuple()
+                .unwrap();
+        PatternParser {
+            // pattern: _pattern,
+            pattern_re,
+        }
     }
     fn parse(&self, file: PyObject) -> PyResult<common::TriplesIterator> {
         let f = PyFileLikeObject::with_requirements(file, true, false, false)?;
         let buf = BufReader::new(f);
         let parser = NTriplesParser::new(buf);
         let term = Arc::new(AtomicBool::new(false));
+
         Ok(common::TriplesIterator {
             it: Box::new(create_iter(parser)),
-            pattern: self.pattern.clone(),
+            pattern: self.pattern_re.clone(),
             term: term,
         })
     }
@@ -82,7 +101,7 @@ impl PatternParser {
         let term = Arc::new(AtomicBool::new(false));
         Ok(common::TriplesIterator {
             it: Box::new(create_iter(parser)),
-            pattern: self.pattern.clone(),
+            pattern: self.pattern_re.clone(),
             term: term,
         })
     }

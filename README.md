@@ -6,6 +6,23 @@
 
 A fast and lightweight Python RDF parser which wraps bindings to Rust's [Rio](https://github.com/Tpt/rio) using [PyO3](https://github.com/PyO3/pyo3).
 
+## Contents
+
+- [LightRDF](#lightrdf)
+  - [Contents](#contents)
+  - [Features](#features)
+  - [Install](#install)
+  - [Basic Usage](#basic-usage)
+    - [Iterate over all triples](#iterate-over-all-triples)
+    - [Search triples with a triple pattern](#search-triples-with-a-triple-pattern)
+    - [Search triples with a triple pattern (Regex)](#search-triples-with-a-triple-pattern-regex)
+    <!-- - [Parse terms](#parse-terms) -->
+    - [Load file objects / texts](#load-file-objects--parse-texts)
+  - [Benchmark (WIP)](#benchmark-wip)
+  - [Alternatives](#alternatives)
+  - [Todo](#todo)
+  - [License](#license)
+
 ## Features
 
 - Supports N-Triples, Turtle, and RDF/XML
@@ -18,33 +35,34 @@ A fast and lightweight Python RDF parser which wraps bindings to Rust's [Rio](ht
 pip install lightrdf
 ```
 
-## Usage
+## Basic Usage
 
-#### Iterate over all triples (Parser)
+### Iterate over all triples
+
+With `Parser`:
 
 ```python
 import lightrdf
 
-parser = lightrdf.Parser()  # or lightrdf.xml.Parser() for xml
+parser = lightrdf.Parser()
 
 for triple in parser.parse("./go.owl", base_iri=None):
     print(triple)
 ```
 
-#### Iterate over all triples (HDT-like)
+With `RDFDocument`:
 
 ```python
 import lightrdf
 
 doc = lightrdf.RDFDocument("./go.owl")
-# ...or lightrdf.RDFDocument("./go.owl", base_iri="", parser=lightrdf.xml.PatternParser) for xml
 
 # `None` matches arbitrary term
 for triple in doc.search_triples(None, None, None):
     print(triple)
 ```
 
-#### Triple pattern (HDT-like)
+### Search triples with a triple pattern
 
 ```python
 import lightrdf
@@ -55,14 +73,48 @@ for triple in doc.search_triples("http://purl.obolibrary.org/obo/GO_0005840", No
     print(triple)
 
 # Output:
-# ('http://purl.obolibrary.org/obo/GO_0005840', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', 'http://www.w3.org/2002/07/owl#Class')
-# ('http://purl.obolibrary.org/obo/GO_0005840', 'http://www.w3.org/2000/01/rdf-schema#subClassOf', 'http://purl.obolibrary.org/obo/GO_0043232')
+# ('<http://purl.obolibrary.org/obo/GO_0005840>', '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>', '<http://www.w3.org/2002/07/owl#Class>')
+# ('<http://purl.obolibrary.org/obo/GO_0005840>', '<http://www.w3.org/2000/01/rdf-schema#subClassOf>', '<http://purl.obolibrary.org/obo/GO_0043232>')
 # ...
-# ('http://purl.obolibrary.org/obo/GO_0005840', 'http://www.geneontology.org/formats/oboInOwl#inSubset', 'http://purl.obolibrary.org/obo/go#goslim_yeast')
-# ('http://purl.obolibrary.org/obo/GO_0005840', 'http://www.w3.org/2000/01/rdf-schema#label', '"ribosome"^^<http://www.w3.org/2001/XMLSchema#string>')
+# ('<http://purl.obolibrary.org/obo/GO_0005840>', '<http://www.geneontology.org/formats/oboInOwl#inSubset>', '<http://purl.obolibrary.org/obo/go#goslim_yeast>')
+# ('<http://purl.obolibrary.org/obo/GO_0005840>', '<http://www.w3.org/2000/01/rdf-schema#label>', '"ribosome"^^<http://www.w3.org/2001/XMLSchema#string>')
 ```
 
-#### Tip: Open file in Python (Parser)
+### Search triples with a triple pattern (Regex)
+
+```python
+import lightrdf
+from lightrdf import Regex
+
+doc = lightrdf.RDFDocument("./go.owl")
+
+for triple in doc.search_triples(Regex("^<http://purl.obolibrary.org/obo/.*>$"), None, Regex(".*amino[\w]+?transferase")):
+    print(triple)
+
+# Output:
+# ('<http://purl.obolibrary.org/obo/GO_0003961>', '<http://www.w3.org/2000/01/rdf-schema#label>', '"O-acetylhomoserine aminocarboxypropyltransferase activity"^^<http://www.w3.org/2001/XMLSchema#string>')
+# ('<http://purl.obolibrary.org/obo/GO_0004047>', '<http://www.geneontology.org/formats/oboInOwl#hasExactSynonym>', '"S-aminomethyldihydrolipoylprotein:(6S)-tetrahydrofolate aminomethyltransferase (ammonia-forming) activity"^^<http://www.w3.org/2001/XMLSchema#string>')
+# ...
+# ('<http://purl.obolibrary.org/obo/GO_0050447>', '<http://www.w3.org/2000/01/rdf-schema#label>', '"zeatin 9-aminocarboxyethyltransferase activity"^^<http://www.w3.org/2001/XMLSchema#string>')
+# ('<http://purl.obolibrary.org/obo/GO_0050514>', '<http://www.geneontology.org/formats/oboInOwl#hasExactSynonym>', '"spermidine:putrescine 4-aminobutyltransferase (propane-1,3-diamine-forming)"^^<http://www.w3.org/2001/XMLSchema#string>')
+```
+
+<!-- ### Parse terms
+
+```python
+import lightrdf
+from lightrdf import is_iri, is_blank, is_literal, parse
+
+doc = lightrdf.RDFDocument("./go.owl")
+
+for s, p, o in doc.search_triples(None, None, None):
+    if is_iri(s):
+        iri = parse.iri(s)
+``` -->
+
+### Load file objects / texts
+
+Load file objects with `Parser`:
 
 ```python
 import lightrdf
@@ -74,17 +126,7 @@ with open("./go.owl", "rb") as f:
         print(triple)
 ```
 
-```python
-import lightrdf
-
-parser = lightrdf.xml.Parser()
-
-with open("./go.owl", "rb") as f:
-    for triple in parser.parse(f, base_iri=None):
-        print(triple)
-```
-
-#### Tip: Open file in Python (HDT-like)
+Load file objects with `RDFDocument`:
 
 ```python
 import lightrdf
@@ -96,14 +138,13 @@ with open("./go.owl", "rb") as f:
         print(triple)
 ```
 
-#### Tip: Parse from string
+Load texts:
 
 ```python
 import io
 import lightrdf
 
-data = """<http://one.example/subject1> <http://one.example/predicate1> <http://one.example/object1> . # comments here
-# or on a line by themselves
+data = """<http://one.example/subject1> <http://one.example/predicate1> <http://one.example/object1> .
 _:subject1 <http://an.example/predicate1> "object1" .
 _:subject2 <http://an.example/predicate2> "object2" ."""
 
