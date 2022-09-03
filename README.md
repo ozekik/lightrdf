@@ -8,20 +8,18 @@ A fast and lightweight Python RDF parser which wraps bindings to Rust's [Rio](ht
 
 ## Contents
 
-- [LightRDF](#lightrdf)
-  - [Contents](#contents)
-  - [Features](#features)
-  - [Install](#install)
-  - [Basic Usage](#basic-usage)
-    - [Iterate over all triples](#iterate-over-all-triples)
-    - [Search triples with a triple pattern](#search-triples-with-a-triple-pattern)
-    - [Search triples with a triple pattern (Regex)](#search-triples-with-a-triple-pattern-regex)
-    <!-- - [Parse terms](#parse-terms) -->
-    - [Load file objects / texts](#load-file-objects--parse-texts)
-  - [Benchmark (WIP)](#benchmark-wip)
-  - [Alternatives](#alternatives)
-  - [Todo](#todo)
-  - [License](#license)
+- [Features](#features)
+- [Install](#install)
+- [Basic Usage](#basic-usage)
+  - [Iterate over all triples](#iterate-over-all-triples)
+  - [Search triples with a triple pattern](#search-triples-with-a-triple-pattern)
+  - [Search triples with a triple pattern (Regex)](#search-triples-with-a-triple-pattern-regex)
+  <!-- - [Parse IRIs, blank nodes, literals](#parse-terms) -->
+  - [Load file objects / texts](#load-file-objects--parse-texts)
+- [Benchmark (WIP)](#benchmark-wip)
+- [Alternatives](#alternatives)
+- [Todo](#todo)
+- [License](#license)
 
 ## Features
 
@@ -99,7 +97,7 @@ for triple in doc.search_triples(Regex("^<http://purl.obolibrary.org/obo/.*>$"),
 # ('<http://purl.obolibrary.org/obo/GO_0050514>', '<http://www.geneontology.org/formats/oboInOwl#hasExactSynonym>', '"spermidine:putrescine 4-aminobutyltransferase (propane-1,3-diamine-forming)"^^<http://www.w3.org/2001/XMLSchema#string>')
 ```
 
-<!-- ### Parse terms
+<!-- ### Parse IRIs, blank nodes, literals
 
 ```python
 import lightrdf
@@ -109,7 +107,7 @@ doc = lightrdf.RDFDocument("./go.owl")
 
 for s, p, o in doc.search_triples(None, None, None):
     if is_iri(s):
-        iri = parse.iri(s)
+        s = parse.iri(s)
 ``` -->
 
 ### Load file objects / texts
