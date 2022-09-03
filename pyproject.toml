@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lightrdf"
-version = "0.2.2"
+version = "0.3.0"
 description = "A fast and lightweight Python RDF parser which wraps bindings to Rust's Rio using PyO3"
 authors = ["Kentaro Ozeki <kentaro.ozeki+dev@gmail.com>"]
 license = "Apache-2.0"
@@ -15,6 +15,7 @@ tox = "^3.25.1"
 maturin = "^0.13.2"
 tox-gh-actions = "^2.9.1"
 pytest = "^7.1.2"
+black = {version = "^22.8.0", allow-prereleases = true}
 
 [build-system]
 requires = ["maturin>=0.13,<0.14"]
