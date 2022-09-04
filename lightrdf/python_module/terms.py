@@ -55,7 +55,6 @@ class Literal(Term):
             f"^^{datatype}" if datatype else r"(?:\^\^([^@]*))?",
             f"@{language}" if language else r"(?:@(.*))?",
         )
-        print(self.pattern)
 
 
 class Triple(Term):

@@ -71,7 +71,6 @@ def build_pattern(pattern: str):
             term = str(IRI(term))
         term = str(term) if term is not None else term
         new_pattern.append(term)
-    print(new_pattern)
     return tuple(new_pattern)
 
 
