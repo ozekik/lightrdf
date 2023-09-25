@@ -8,7 +8,7 @@ homepage = "https://github.com/ozekik/lightrdf"
 repository = "https://github.com/ozekik/lightrdf"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.25.1"
