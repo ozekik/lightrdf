@@ -207,6 +207,7 @@ $ gtime python3 count_triples_lightrdf_ntparser.py dbpedia_2016-10.nt  # LightRD
 - [x] Adopt CI
 - [x] Handle Base IRI
 - [x] Add basic tests
+- [ ] Switch to maturin-action from cibuildwheel
 - [ ] Support NQuads and TriG
 - [ ] Add docs
 - [ ] Add tests for [w3c/rdf-tests](https://github.com/w3c/rdf-tests)
