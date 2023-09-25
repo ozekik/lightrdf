@@ -16,14 +16,14 @@ crate-type = ["cdylib"]
 [dependencies]
 oxiri = "0.2.2"
 pyo3-file = "0.5.0"
-rio_api = "0.7.0"
-rio_turtle = "0.7.0"
-rio_xml = "0.7.0"
-signal-hook = "0.3.14"
+rio_api = "0.7.1"
+rio_turtle = "0.7.1"
+rio_xml = "0.7.1"
+signal-hook = "0.3.17"
 pyo3 = "0.16.6"
 regex = "1"
 lazy_static = "1"
-itertools = "0.10.3"
+itertools = "0.11.0"
 
 [features]
 # https://github.com/PyO3/pyo3/blob/c6abf24cca6a74a59d9a88715944f56313e1de21/guide/src/faq.md#i-cant-run-cargo-test-im-having-linker-issues-like-symbol-not-found-or-undefined-reference-to-_pyexc_systemerror
