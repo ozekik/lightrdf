@@ -12,11 +12,14 @@ python = "^3.8"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.25.1"
-maturin = "^0.13.2"
+maturin = "^1.2.3"
 tox-gh-actions = "^2.9.1"
-pytest = "^7.1.2"
+pytest = "^7.4.2"
 black = {version = "^22.8.0", allow-prereleases = true}
 
 [build-system]
-requires = ["maturin>=0.13,<0.14"]
+requires = ["maturin>=1.2,<2.0"]
 build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
