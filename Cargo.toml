@@ -15,12 +15,12 @@ crate-type = ["cdylib"]
 
 [dependencies]
 oxiri = "0.2.2"
-pyo3-file = "0.5.0"
+pyo3-file = "0.7.0"
 rio_api = "0.7.1"
 rio_turtle = "0.7.1"
 rio_xml = "0.7.1"
 signal-hook = "0.3.17"
-pyo3 = "0.16.6"
+pyo3 = "0.18.3"
 regex = "1"
 lazy_static = "1"
 itertools = "0.11.0"

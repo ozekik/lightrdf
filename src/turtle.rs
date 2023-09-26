@@ -70,7 +70,7 @@ struct PatternParser {
 #[pymethods]
 impl PatternParser {
     #[new]
-    #[args(regex = true)]
+    #[pyo3(signature = (pattern, regex = true))]
     fn new(pattern: &PyTuple, regex: bool) -> Self {
         let _pattern = pattern.extract::<common::TriplePattern>().unwrap();
         let pattern_re: (Option<Regex>, Option<Regex>, Option<Regex>) =
@@ -128,7 +128,7 @@ impl PatternParser {
 }
 
 #[pymodule]
-pub(crate) fn turtle(_py: Python, m: &PyModule) -> PyResult<()> {
+pub(crate) fn turtle(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<Parser>()?;
     m.add_class::<PatternParser>()?;
 
