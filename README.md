@@ -25,7 +25,8 @@ A fast and lightweight Python RDF parser which wraps bindings to Rust's [Rio](ht
 
 - Supports N-Triples, Turtle, and RDF/XML
 - Handles large-size RDF documents
-- Provides HDT-like interfaces
+- Simple interfaces for parsing and searching triples
+- Support regex in triple patterns
 
 ## Install
 
