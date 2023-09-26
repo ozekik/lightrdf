@@ -1,4 +1,12 @@
 
+v0.3.2 / 2023-09-26
+===================
+
+  * Update dependencies
+  * [INTERNAL] Set Rust edition to 2021
+  * [INTERNAL] Update maturin and GitHub Actions workflow (using maturin-action@v1)
+  * [INTERNAL] Update tests in CI
+
 v0.3.1 / 2022-09-04
 ===================
 
